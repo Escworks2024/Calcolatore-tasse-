@@ -1,194 +1,138 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="it">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Site View Counter & Crypto Tools</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css">
+    <title>Calcolo Regime Forfettario</title>
     <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            padding: 0;
-            margin: 0;
-        }
-        footer {
-            background-color: #000;
-            color: #ffffff;
-            text-align: center;
-            padding: 20px;
-            position: fixed;
+        table {
             width: 100%;
-            bottom: 0;
+            border-collapse: collapse;
         }
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 60px 20px;
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
             text-align: center;
         }
-        .box {
-            padding: 40px;
-            background: #ffffff;
-            border-radius: 20px;
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
+        input {
+            width: 100%;
+            box-sizing: border-box;
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1 class="title has-text-centered">Welcome to My Website</h1>
-    </header>
-    <div class="container">
-        <div class="box">
-            <h1 class="title">Confronto Market Cap Criptovalute</h1>
-            <p class="subtitle">Seleziona due criptovalute per confrontare la loro capitalizzazione di mercato e vedere come cambierebbe il prezzo.</p>
-            <div class="field">
-                <label class="label" for="crypto1">Seleziona la prima criptovaluta:</label>
-                <div class="control">
-                    <input class="input" type="text" id="searchCrypto1" placeholder="Cerca criptovaluta...">
-                </div>
-                <div class="control">
-                    <select class="input" id="crypto1"></select>
-                </div>
-            </div>
-            <div class="field">
-                <label class="label" for="crypto2">Seleziona la seconda criptovaluta:</label>
-                <div class="control">
-                    <input class="input" type="text" id="searchCrypto2" placeholder="Cerca criptovaluta...">
-                </div>
-                <div class="control">
-                    <select class="input" id="crypto2"></select>
-                </div>
-            </div>
-            <div class="control">
-                <button class="button is-primary" onclick="compareMarketCap()">Confronta Market Cap</button>
-            </div>
-            <div id="result" class="content" style="margin-top: 20px;"></div>
-        </div>
-        <button class="button" onclick="toggleSecondForm()">Apri Tool di Calcolo Liquidazione</button>
-        <div id="secondForm" style="display: none;">
-            <div class="box">
-                <h1 class="title">Calcolo del Punto di Liquidazione</h1>
-                <p class="subtitle">Seleziona una criptovaluta, inserisci la leva finanziaria e scegli se andare LONG o SHORT per calcolare il punto di liquidazione.</p>
-                <form id="liquidationForm">
-                    <div class="field">
-                        <label class="label" for="cryptoSelect">Seleziona la criptovaluta:</label>
-                        <div class="control">
-                            <select id="cryptoSelect" class="input">
-                                <option value="">Seleziona una criptovaluta</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="field">
-                        <label class="label" for="leverage">Inserisci la leva finanziaria:</label>
-                        <div class="control">
-                            <input id="leverage" class="input" type="number" placeholder="Es. 5" min="1">
-                        </div>
-                    </div>
-                    <div class="field">
-                        <label class="label">Scegli direzione:</label>
-                        <div class="control">
-                            <label class="radio">
-                                <input type="radio" name="position" value="long"> LONG
-                            </label>
-                            <label class="radio">
-                                <input type="radio" name="position" value="short"> SHORT
-                            </label>
-                        </div>
-                    </div>
-                    <div class="control">
-                        <button class="button is-primary" type="button" onclick="calculateLiquidation()">Calcola Punto di Liquidazione</button>
-                    </div>
-                </form>
-                <div id="liquidationResult" class="content" style="margin-top: 20px;"></div>
-            </div>
-        </div>
-        <p class="content has-text-centered">Enjoy browsing the site!</p>
-    </div>
-    <footer>
-        <p id="viewCount">Loading view count...</p>
-    </footer>
 
-    <script>
-        function toggleSecondForm() {
-            const form = document.getElementById('secondForm');
-            if (form.style.display === 'none' || form.style.display === '') {
-                form.style.display = 'block';
-            } else {
-                form.style.display = 'none';
-            }
+<h2>Calcolo Regime Forfettario</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Parametro</th>
+            <th>Valore</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Fatturato (€)</td>
+            <td><input type="number" id="fatturato" oninput="calcola()"></td>
+        </tr>
+        <tr>
+            <td>Coefficiente di Redditività (%)</td>
+            <td><input type="number" id="coefficiente-redditivita" value="40" oninput="calcola()"></td>
+        </tr>
+        <tr>
+            <td>Tassazione (%)</td>
+            <td><input type="number" id="tassazione" value="15" oninput="calcola()"></td>
+        </tr>
+        <tr>
+            <td>INPS Fisso (€ ogni tre mesi)</td>
+            <td><input type="number" id="inps-fisso-trimestrale" value="850" oninput="calcola()"></td>
+        </tr>
+        <tr>
+            <td>Soglia INPS Eccedenza (€)</td>
+            <td><input type="number" id="soglia-inps-eccedenza" value="15000" oninput="calcola()"></td>
+        </tr>
+        <tr>
+            <td>Aliquota INPS Eccedenza (%)</td>
+            <td><input type="number" id="aliquota-inps-eccedenza" value="25" oninput="calcola()"></td>
+        </tr>
+    </tbody>
+</table>
+
+<h3>Risultati</h3>
+<table>
+    <thead>
+        <tr>
+            <th>Descrizione</th>
+            <th>Valore (€)</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Reddito Imponibile</td>
+            <td id="reddito-imponibile"></td>
+        </tr>
+        <tr>
+            <td>Tasse</td>
+            <td id="tasse"></td>
+        </tr>
+        <tr>
+            <td>INPS Fisso (Annuale)</td>
+            <td id="inps-fisso-annuo"></td>
+        </tr>
+        <tr>
+            <td>INPS Eccedenza</td>
+            <td id="inps-eccedenza"></td>
+        </tr>
+        <tr>
+            <td>Reddito Netto</td>
+            <td id="reddito-netto"></td>
+        </tr>
+    </tbody>
+</table>
+
+<script>
+    function calcola() {
+        // Recupera i valori inseriti dall'utente
+        const fatturato = parseFloat(document.getElementById('fatturato').value) || 0;
+        const coefficienteRedditivita = parseFloat(document.getElementById('coefficiente-redditivita').value) || 0;
+        const tassazione = parseFloat(document.getElementById('tassazione').value) || 0;
+        const inpsFissoTrimestrale = parseFloat(document.getElementById('inps-fisso-trimestrale').value) || 0;
+        const sogliaInpsEccedenza = parseFloat(document.getElementById('soglia-inps-eccedenza').value) || 0;
+        const aliquotaInpsEccedenza = parseFloat(document.getElementById('aliquota-inps-eccedenza').value) || 0;
+
+        // Calcola il reddito imponibile
+        const redditoImponibile = fatturato * (coefficienteRedditivita / 100);
+
+        // Calcola le tasse
+        const tasse = redditoImponibile * (tassazione / 100);
+
+        // Calcola l'INPS fisso annuale (850 € ogni tre mesi = 3.400 € all'anno)
+        const inpsFissoAnnuale = inpsFissoTrimestrale * 4;
+
+        // Calcola l'INPS eccedenza (25% sul reddito netto superiore a 15.000 €)
+        let inpsEccedenza = 0;
+        const redditoNettoPrimaDiINPS = redditoImponibile - tasse;
+        if (redditoNettoPrimaDiINPS > sogliaInpsEccedenza) {
+            inpsEccedenza = (redditoNettoPrimaDiINPS - sogliaInpsEccedenza) * (aliquotaInpsEccedenza / 100);
         }
 
-        async function loadCryptos() {
-            try {
-                const response = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc`);
-                const cryptos = await response.json();
-                const selectCrypto1 = document.getElementById('crypto1');
-                const selectCrypto2 = document.getElementById('crypto2');
-                const cryptoSelect = document.getElementById('cryptoSelect');
+        // Calcola il reddito netto finale
+        const redditoNetto = redditoNettoPrimaDiINPS - inpsFissoAnnuale - inpsEccedenza;
 
-                selectCrypto1.innerHTML = '';
-                selectCrypto2.innerHTML = '';
-                cryptoSelect.innerHTML = '<option value="">Seleziona una criptovaluta</option>';
+        // Aggiorna i risultati nella tabella
+        document.getElementById('reddito-imponibile').textContent = redditoImponibile.toFixed(2);
+        document.getElementById('tasse').textContent = tasse.toFixed(2);
+        document.getElementById('inps-fisso-annuo').textContent = inpsFissoAnnuale.toFixed(2);
+        document.getElementById('inps-eccedenza').textContent = inpsEccedenza.toFixed(2);
+        document.getElementById('reddito-netto').textContent = redditoNetto.toFixed(2);
+    }
 
-                cryptos.forEach((crypto, index) => {
-                    const option1 = document.createElement('option');
-                    option1.value = crypto.id;
-                    option1.innerHTML = `${index + 1}. ${crypto.name} (Market Cap: USD ${crypto.market_cap.toLocaleString()})`;
-                    selectCrypto1.add(option1);
+    // Esegui il calcolo iniziale
+    calcola();
+</script>
 
-                    const option2 = document.createElement('option');
-                    option2.value = crypto.id;
-                    option2.innerHTML = `${index + 1}. ${crypto.name} (Market Cap: USD ${crypto.market_cap.toLocaleString()})`;
-                    selectCrypto2.add(option2);
-
-                    const option3 = document.createElement('option');
-                    option3.value = crypto.id;
-                    option3.innerHTML = `${crypto.name}`;
-                    cryptoSelect.add(option3);
-                });
-            } catch (error) {
-                console.error('Errore durante il caricamento delle criptovalute:', error);
-            }
-        }
-
-        function calculateLiquidation() {
-            const crypto = document.getElementById('cryptoSelect').value;
-            const leverage = parseFloat(document.getElementById('leverage').value);
-            const position = document.querySelector('input[name="position"]:checked');
-
-            if (!crypto || !leverage || !position) {
-                alert('Per favore, completa tutti i campi per calcolare il punto di liquidazione.');
-                return;
-            }
-
-            const liquidationPrice = (position.value === 'long')
-                ? (100 / leverage).toFixed(2)
-                : (100 * leverage).toFixed(2);
-
-            document.getElementById('liquidationResult').innerHTML = `
-                <p>Con una leva di <strong>${leverage}x</strong> e una posizione <strong>${position.value.toUpperCase()}</strong>, il punto di liquidazione è: <strong>${liquidationPrice}</strong>.</p>
-            `;
-        }
-
-        // Retrieve view count from localStorage or initialize it
-        let viewCount = localStorage.getItem('viewCount');
-        if (!viewCount) {
-            viewCount = 0;
-        }
-
-        // Increment the view count
-        viewCount++;
-
-        // Store the updated view count back to localStorage
-        localStorage.setItem('viewCount', viewCount);
-
-        // Display the view count in the footer
-        document.getElementById('viewCount').innerText = `This site has been viewed ${viewCount} times.`;
-
-        // Load cryptocurrencies on page load
-        loadCryptos();
-    </script>
 </body>
 </html>
