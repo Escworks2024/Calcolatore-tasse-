@@ -16,9 +16,13 @@
             padding: 10px;
             text-align: center;
         }
-        input {
+        input, select {
             width: 100%;
             box-sizing: border-box;
+        }
+        input:disabled {
+            background-color: #f0f0f0;
+            color: #a0a0a0;
         }
     </style>
 </head>
@@ -47,8 +51,13 @@
             <td><input type="number" id="tassazione" value="15" oninput="calcola()"></td>
         </tr>
         <tr>
-            <td>INPS Fisso (€ ogni tre mesi)</td>
-            <td><input type="number" id="inps-fisso-trimestrale" value="850" oninput="calcola()"></td>
+            <td>Modalità INPS</td>
+            <td>
+                <select id="modalita-inps" onchange="aggiornaModalitaINPS()">
+                    <option value="fisso">INPS Fisso (850 € ogni tre mesi)</option>
+                    <option value="proporzione">INPS in Proporzione (24% del reddito imponibile)</option>
+                </select>
+            </td>
         </tr>
         <tr>
             <td>Soglia INPS Eccedenza (€)</td>
@@ -79,8 +88,8 @@
             <td id="tasse"></td>
         </tr>
         <tr>
-            <td>INPS Fisso (Annuale)</td>
-            <td id="inps-fisso-annuo"></td>
+            <td>INPS</td>
+            <td id="inps"></td>
         </tr>
         <tr>
             <td>INPS Eccedenza</td>
@@ -94,12 +103,29 @@
 </table>
 
 <script>
+    function aggiornaModalitaINPS() {
+        const modalitaInps = document.getElementById('modalita-inps').value;
+        const aliquotaInpsEccedenzaInput = document.getElementById('aliquota-inps-eccedenza');
+
+        if (modalitaInps === "fisso") {
+            // Abilita il campo "Aliquota INPS Eccedenza"
+            aliquotaInpsEccedenzaInput.disabled = false;
+        } else if (modalitaInps === "proporzione") {
+            // Disabilita il campo e resetta il valore
+            aliquotaInpsEccedenzaInput.disabled = true;
+            aliquotaInpsEccedenzaInput.value = 0;
+        }
+
+        // Ricalcola i risultati
+        calcola();
+    }
+
     function calcola() {
         // Recupera i valori inseriti dall'utente
         const fatturato = parseFloat(document.getElementById('fatturato').value) || 0;
         const coefficienteRedditivita = parseFloat(document.getElementById('coefficiente-redditivita').value) || 0;
         const tassazione = parseFloat(document.getElementById('tassazione').value) || 0;
-        const inpsFissoTrimestrale = parseFloat(document.getElementById('inps-fisso-trimestrale').value) || 0;
+        const modalitaInps = document.getElementById('modalita-inps').value;
         const sogliaInpsEccedenza = parseFloat(document.getElementById('soglia-inps-eccedenza').value) || 0;
         const aliquotaInpsEccedenza = parseFloat(document.getElementById('aliquota-inps-eccedenza').value) || 0;
 
@@ -109,29 +135,38 @@
         // Calcola le tasse
         const tasse = redditoImponibile * (tassazione / 100);
 
-        // Calcola l'INPS fisso annuale (850 € ogni tre mesi = 3.400 € all'anno)
-        const inpsFissoAnnuale = inpsFissoTrimestrale * 4;
+        // Calcola l'INPS in base alla modalità selezionata
+        let inps;
+        if (modalitaInps === "fisso") {
+            // INPS fisso: 850 € ogni tre mesi (3.400 € all'anno)
+            inps = 3400;
+        } else if (modalitaInps === "proporzione") {
+            // INPS in proporzione: 24% del reddito imponibile
+            inps = redditoImponibile * 0.24;
+        }
 
-        // Calcola l'INPS eccedenza (25% sul reddito netto superiore a 15.000 €)
+        // Calcola l'INPS eccedenza (solo se l'aliquota è abilitata)
         let inpsEccedenza = 0;
-        const redditoNettoPrimaDiINPS = redditoImponibile - tasse;
-        if (redditoNettoPrimaDiINPS > sogliaInpsEccedenza) {
-            inpsEccedenza = (redditoNettoPrimaDiINPS - sogliaInpsEccedenza) * (aliquotaInpsEccedenza / 100);
+        if (!document.getElementById('aliquota-inps-eccedenza').disabled) {
+            const redditoNettoPrimaDiINPS = redditoImponibile - tasse;
+            if (redditoNettoPrimaDiINPS > sogliaInpsEccedenza) {
+                inpsEccedenza = (redditoNettoPrimaDiINPS - sogliaInpsEccedenza) * (aliquotaInpsEccedenza / 100);
+            }
         }
 
         // Calcola il reddito netto finale
-        const redditoNetto = redditoNettoPrimaDiINPS - inpsFissoAnnuale - inpsEccedenza;
+        const redditoNetto = redditoImponibile - tasse - inps - inpsEccedenza;
 
         // Aggiorna i risultati nella tabella
         document.getElementById('reddito-imponibile').textContent = redditoImponibile.toFixed(2);
         document.getElementById('tasse').textContent = tasse.toFixed(2);
-        document.getElementById('inps-fisso-annuo').textContent = inpsFissoAnnuale.toFixed(2);
+        document.getElementById('inps').textContent = inps.toFixed(2);
         document.getElementById('inps-eccedenza').textContent = inpsEccedenza.toFixed(2);
         document.getElementById('reddito-netto').textContent = redditoNetto.toFixed(2);
     }
 
     // Esegui il calcolo iniziale
-    calcola();
+    aggiornaModalitaINPS();
 </script>
 
 </body>
