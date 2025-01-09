@@ -190,8 +190,21 @@
             <td><input type="number" id="fatturato" oninput="calcola()"></td>
         </tr>
         <tr>
+            <td>Professione</td>
+            <td>
+                <select id="professione" onchange="aggiornaProfessione()">
+                    <option value="40">Commercianti</option>
+                    <option value="67">Artigiani</option>
+                    <option value="78">Fisioterapisti</option>
+                    <option value="78">Medici</option>
+                    <option value="78">Ingegneri</option>
+                    <option value="86">Altri professionisti</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
             <td>Coefficiente di Redditività (%)</td>
-            <td><input type="number" id="coefficiente-redditivita" value="40" oninput="calcola()"></td>
+            <td><input type="number" id="coefficiente-redditivita" readonly></td>
         </tr>
         <tr>
             <td>Tassazione (%)</td>
@@ -258,6 +271,31 @@
 </footer>
 
 <script>
+    // Funzione per aggiornare i campi INPS in base alla professione selezionata
+    function aggiornaProfessione() {
+        const professioneSelezionata = document.getElementById('professione').value;
+        const modalitaInps = document.getElementById('modalita-inps');
+        const aliquotaInpsEccedenzaInput = document.getElementById('aliquota-inps-eccedenza');
+
+        // Aggiorna il coefficiente di redditività
+        document.getElementById('coefficiente-redditivita').value = professioneSelezionata;
+
+        // Disabilita INPS Fisso e Eccedenza per professionisti
+        if (professioneSelezionata == 78 || professioneSelezionata == 86) {
+            modalitaInps.value = "proporzione";
+            modalitaInps.disabled = true;
+            aliquotaInpsEccedenzaInput.disabled = true;
+            aliquotaInpsEccedenzaInput.value = 0;
+        } else {
+            modalitaInps.disabled = false;
+            aliquotaInpsEccedenzaInput.disabled = false;
+            aliquotaInpsEccedenzaInput.value = 25;
+        }
+
+        // Ricalcola i risultati
+        calcola();
+    }
+
     function aggiornaModalitaINPS() {
         const modalitaInps = document.getElementById('modalita-inps').value;
         const aliquotaInpsEccedenzaInput = document.getElementById('aliquota-inps-eccedenza');
@@ -320,8 +358,8 @@
         document.getElementById('reddito-netto').textContent = redditoNetto.toFixed(2);
     }
 
-    // Esegui il calcolo iniziale
-    aggiornaModalitaINPS();
+    // Imposta il coefficiente di redditività iniziale
+    aggiornaProfessione();
 </script>
 
 </body>
